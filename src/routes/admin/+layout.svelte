@@ -1,7 +1,9 @@
 <script lang="ts">
-  import AdminProvider from "$lib/components/AdminProvider.svelte";
+	import AdminProvider from '$lib/components/AdminProvider.svelte';
+
+	let { children } = $props();
 </script>
 
 <AdminProvider>
-  <slot />
+	{@render children()}
 </AdminProvider>
