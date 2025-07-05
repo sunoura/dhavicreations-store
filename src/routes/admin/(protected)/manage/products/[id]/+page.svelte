@@ -19,11 +19,7 @@
 
 	let title = $state('');
 	let slug = $state('');
-<<<<<<< HEAD
-	let categoryId = $state<string | null>(null);
-=======
 	let categoryId = $state<string | undefined>(undefined);
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 	let description = $state('');
 	let price = $state('');
 	let sku = $state('');
@@ -31,10 +27,7 @@
 	let isActive = $state(true);
 	let selectedTags = $state<string[]>([]);
 	let newTag = $state('');
-<<<<<<< HEAD
-=======
 	let showCategoryForm = $state(false);
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 	let newCategoryName = $state('');
 	let newCategoryDescription = $state('');
 	let isCreatingCategory = $state(false);
@@ -75,77 +68,6 @@
 
 	const productId = page.params.id;
 
-<<<<<<< HEAD
-	async function loadProduct() {
-		try {
-			isLoading = true;
-			const response = await fetch(`/api/products/${productId}`);
-			if (!response.ok) {
-				throw new Error('Failed to load product');
-			}
-			const product = await response.json();
-
-			title = product.title;
-			slug = product.slug;
-			categoryId = product.categoryId.toString();
-			description = product.description || '';
-			price = product.price.toString();
-			sku = product.sku;
-			stock = product.stock.toString();
-			isActive = product.isActive;
-			selectedTags = product.tags || [];
-			selectedImages = product.images || [];
-			coverImageId = product.coverImageId;
-		} catch (err) {
-			console.error('Error loading product:', err);
-			error = 'Failed to load product';
-			toast.error('Failed to load product');
-		} finally {
-			isLoading = false;
-		}
-	}
-
-	async function loadCategories() {
-		try {
-			isLoadingCategories = true;
-			const response = await fetch('/api/categories');
-			if (!response.ok) {
-				throw new Error('Failed to load categories');
-			}
-			categories = await response.json();
-		} catch (err) {
-			console.error('Error loading categories:', err);
-		} finally {
-			isLoadingCategories = false;
-		}
-	}
-
-	async function loadAvailableTags() {
-		try {
-			isLoadingTags = true;
-			const response = await fetch('/api/products/tags');
-			if (!response.ok) {
-				throw new Error('Failed to load tags');
-			}
-			availableTags = await response.json();
-		} catch (err) {
-			console.error('Error loading tags:', err);
-		} finally {
-			isLoadingTags = false;
-		}
-	}
-
-	async function loadImages() {
-		try {
-			const response = await fetch('/api/images');
-			if (!response.ok) {
-				throw new Error('Failed to load images');
-			}
-			allImages = await response.json();
-		} catch (err) {
-			console.error('Error loading images:', err);
-		}
-=======
 	// Initialize form with server data
 	if (serverProduct) {
 		title = serverProduct.title;
@@ -160,7 +82,6 @@
 		selectedImages = serverProduct.images || [];
 		coverImageId = serverProduct.coverImageId;
 		isLoading = false;
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 	}
 
 	function generateSlug() {
@@ -474,58 +395,6 @@
 
 				<div class="space-y-2">
 					<Label for="category">Category *</Label>
-<<<<<<< HEAD
-					<Select.Root type="single" bind:value={categoryId} required>
-						<Select.Trigger class="w-full">
-							{categoryId
-								? categories.find((c) => c.id.toString() === categoryId)?.name
-								: 'Select a category'}
-						</Select.Trigger>
-						<Select.Content>
-							{#each categories as category}
-								<Select.Item value={category.id.toString()} label={category.name}>
-									{category.name}
-								</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-
-					<!-- Add New Category -->
-					<div class="space-y-2 mt-4 p-4 border rounded-lg bg-gray-50">
-						<Label class="text-sm text-gray-600">Add New Category</Label>
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-							<Input
-								bind:value={newCategoryName}
-								placeholder="Category name"
-								onkeydown={(e) => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										createCategory();
-									}
-								}}
-							/>
-							<Input
-								bind:value={newCategoryDescription}
-								placeholder="Description (optional)"
-								onkeydown={(e) => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										createCategory();
-									}
-								}}
-							/>
-						</div>
-						<Button
-							type="button"
-							variant="outline"
-							onclick={createCategory}
-							disabled={!newCategoryName.trim() || isCreatingCategory}
-							class="w-full"
-						>
-							{isCreatingCategory ? 'Creating...' : 'Add Category'}
-						</Button>
-					</div>
-=======
 					<div class="flex gap-2">
 						<Select.Root type="single" bind:value={categoryId} required>
 							<Select.Trigger class="w-full">
@@ -569,7 +438,6 @@
 							onCancel={() => (showCategoryForm = false)}
 						/>
 					{/if}
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 				</div>
 
 				<div class="space-y-2">
