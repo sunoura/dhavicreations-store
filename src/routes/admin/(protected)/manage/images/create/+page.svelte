@@ -115,7 +115,7 @@
 			}
 
 			const result = await response.json();
-			console.log('Upload successful:', result);
+			// Upload successful
 
 			toast.success('Image uploaded successfully!');
 

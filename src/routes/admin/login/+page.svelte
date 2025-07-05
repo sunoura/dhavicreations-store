@@ -41,7 +41,7 @@
 					goto('/admin/dashboard');
 				}
 			} else {
-				console.log(data);
+				// Debug data removed
 				error = data.error || 'Login failed';
 			}
 		} catch (err) {

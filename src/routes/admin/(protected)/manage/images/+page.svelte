@@ -41,8 +41,7 @@
 
 			allImages = await response.json();
 			images = allImages;
-			console.log('Images loaded:', allImages.length);
-			console.log('Sample image with tags:', allImages[0]);
+			// Images loaded successfully
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Failed to load images';
 			error = errorMessage;
@@ -75,7 +74,7 @@
 				throw new Error('Failed to load tags');
 			}
 			availableTags = await response.json();
-			console.log('Available tags loaded:', availableTags);
+			// Available tags loaded successfully
 		} catch (err) {
 			console.error('Error loading tags:', err);
 		} finally {
@@ -107,13 +106,11 @@
 
 		// Filter by selected tags
 		if (selectedTagFilters.length > 0) {
-			console.log('Filtering by tags:', selectedTagFilters);
-			console.log('Images before tag filter:', filtered.length);
+			// Filtering by tags
 			filtered = filtered.filter(
 				(image) => image.tags && selectedTagFilters.some((tag) => image.tags!.includes(tag))
 			);
-			console.log('Images after tag filter:', filtered.length);
-			console.log('Sample image tags:', filtered[0]?.tags);
+			// Tag filtering completed
 		}
 
 		images = filtered;

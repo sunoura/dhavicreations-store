@@ -23,7 +23,7 @@
 		}
 
 		const result = await response.json();
-		console.log('Product updated successfully:', result);
+		// Product updated successfully
 
 		toast.success('Product updated successfully!');
 		goto('/admin/manage/products');

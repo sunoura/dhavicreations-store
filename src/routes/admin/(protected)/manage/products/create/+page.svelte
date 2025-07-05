@@ -22,7 +22,7 @@
 		}
 
 		const result = await response.json();
-		console.log('Product created successfully:', result);
+		// Product created successfully
 
 		toast.success('Product created successfully!');
 		goto('/admin/manage/products');

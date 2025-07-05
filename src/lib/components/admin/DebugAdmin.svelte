@@ -1,38 +1,34 @@
 <script lang="ts">
-  import { useAdmin } from "$lib/stores/admin.svelte";
+	import { useAdmin } from '$lib/stores/admin.svelte';
 
-  const { state } = useAdmin();
+	const { state } = useAdmin();
 
-  // Debug admin state changes
-  $effect(() => {
-    console.log("Admin state changed:", {
-      admin: state.admin,
-      isAuthenticated: state.isAuthenticated,
-      loading: state.loading,
-    });
-  });
+	// Debug admin state changes - removed console.log statements
+	$effect(() => {
+		// Admin state changed
+	});
 
-  // Monitor authentication status
-  $effect(() => {
-    if (state.isAuthenticated) {
-      console.log("Admin authenticated:", state.admin?.username);
-    } else {
-      console.log("Admin not authenticated");
-    }
-  });
+	// Monitor authentication status - removed console.log statements
+	$effect(() => {
+		if (state.isAuthenticated) {
+			// Admin authenticated
+		} else {
+			// Admin not authenticated
+		}
+	});
 </script>
 
 {#if import.meta.env.DEV}
-  <div class="debug-panel bg-gray-100 p-4 rounded text-sm">
-    <h3 class="font-bold mb-2">Debug Info (Dev Only)</h3>
-    <pre>{JSON.stringify(
-        {
-          admin: state.admin,
-          isAuthenticated: state.isAuthenticated,
-          loading: state.loading,
-        },
-        null,
-        2
-      )}</pre>
-  </div>
+	<div class="debug-panel bg-gray-100 p-4 rounded text-sm">
+		<h3 class="font-bold mb-2">Debug Info (Dev Only)</h3>
+		<pre>{JSON.stringify(
+				{
+					admin: state.admin,
+					isAuthenticated: state.isAuthenticated,
+					loading: state.loading
+				},
+				null,
+				2
+			)}</pre>
+	</div>
 {/if}
