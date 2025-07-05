@@ -12,7 +12,7 @@
 		SheetTrigger
 	} from '$lib/components/ui/sheet';
 	import { toast } from 'svelte-sonner';
-	import { Image, Plus, X } from '@lucide/svelte';
+	import { Image, Plus, X, Upload, Star } from '@lucide/svelte';
 	import CategoryForm from './CategoryForm.svelte';
 
 	interface Category {
@@ -96,6 +96,10 @@
 	let selectedImageIds = $state<number[]>([]);
 	let error = $state<string | null>(null);
 
+	// Image upload state
+	let isUploading = $state(false);
+	let uploadProgress = $state(0);
+
 	function generateSlug() {
 		slug = title
 			.toLowerCase()
@@ -166,6 +170,7 @@
 
 	function setCoverImage(imageId: number) {
 		coverImageId = imageId;
+		toast.success('Cover image updated');
 	}
 
 	function filterImages() {
@@ -191,6 +196,72 @@
 		}
 
 		return filtered;
+	}
+
+	async function handleImageUpload(event: Event) {
+		const target = event.target as HTMLInputElement;
+		const files = target.files;
+
+		if (!files || files.length === 0) return;
+
+		isUploading = true;
+		uploadProgress = 0;
+
+		try {
+			for (const file of files) {
+				// Clean up filename for title
+				const cleanTitle = file.name
+					.replace(/\.[^/.]+$/, '') // Remove extension
+					.replace(/[_-]/g, ' ') // Replace underscores and hyphens with spaces
+					.replace(/\s+/g, ' ') // Replace multiple spaces with single space
+					.trim();
+
+				const formData = new FormData();
+				formData.append('file', file);
+				formData.append('title', cleanTitle);
+
+				const response = await fetch('/api/images', {
+					method: 'POST',
+					body: formData
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json();
+					throw new Error(errorData.error || 'Failed to upload image');
+				}
+
+				const newImage = await response.json();
+
+				// Add to selected images
+				selectedImages = [
+					...selectedImages,
+					{
+						id: newImage.id,
+						imageUrl: newImage.imageUrl,
+						thumbUrl: newImage.thumbUrl,
+						filename: newImage.filename
+					}
+				];
+
+				// Set as cover image if it's the first image
+				if (selectedImages.length === 1) {
+					coverImageId = newImage.id;
+				}
+
+				uploadProgress += 100 / files.length;
+			}
+
+			toast.success(`Uploaded ${files.length} image(s) successfully`);
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
+			toast.error(errorMessage);
+			console.error('Error uploading image:', err);
+		} finally {
+			isUploading = false;
+			uploadProgress = 0;
+			// Reset file input
+			target.value = '';
+		}
 	}
 
 	async function handleSubmit() {
@@ -224,6 +295,7 @@
 			return;
 		}
 
+		isLoading = true;
 		error = null;
 
 		try {
@@ -254,6 +326,8 @@
 			error = errorMessage;
 			toast.error(errorMessage);
 			console.error('Error saving product:', err);
+		} finally {
+			isLoading = false;
 		}
 	}
 </script>
@@ -295,44 +369,33 @@
 
 			<div class="space-y-2">
 				<Label for="category">Category *</Label>
-				{#if categories.length > 0}
-					<div class="flex gap-2">
-						<Select.Root type="single" bind:value={categoryId}>
-							<Select.Trigger class="w-full">
-								{categoryId
-									? categories.find(
-											(c: { id: number; name: string }) =>
-												c.id.toString() === categoryId
-										)?.name
-									: 'Select a category'}
-							</Select.Trigger>
-							<Select.Content>
-								{#each categories as category}
-									<Select.Item
-										value={category.id.toString()}
-										label={category.name}
-									>
-										{category.name}
-									</Select.Item>
-								{/each}
-							</Select.Content>
-						</Select.Root>
-						<Button
-							type="button"
-							variant="outline"
-							onclick={showNewCategoryForm}
-							class="whitespace-nowrap"
-						>
-							New
-						</Button>
-					</div>
-				{:else}
-					<div
-						class="w-full h-10 bg-gray-100 rounded-md flex items-center justify-center text-gray-500"
+				<div class="flex gap-2">
+					<Select.Root type="single" bind:value={categoryId} required>
+						<Select.Trigger class="w-full">
+							{categoryId
+								? categories.find(
+										(c: { id: number; name: string }) =>
+											c.id.toString() === categoryId
+									)?.name
+								: 'Select a category'}
+						</Select.Trigger>
+						<Select.Content>
+							{#each categories as category}
+								<Select.Item value={category.id.toString()} label={category.name}>
+									{category.name}
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+					<Button
+						type="button"
+						variant="outline"
+						onclick={showNewCategoryForm}
+						class="whitespace-nowrap"
 					>
-						No categories available
-					</div>
-				{/if}
+						New
+					</Button>
+				</div>
 
 				<!-- Add New Category Form -->
 				{#if showCategoryForm}
@@ -448,127 +511,175 @@
 		<div class="space-y-4">
 			<div class="flex items-center justify-between">
 				<Label>Product Images</Label>
-				<Sheet bind:open={isImageSidebarOpen}>
-					<SheetTrigger>
-						<Button
-							type="button"
-							variant="outline"
-							onclick={() => {
-								isImageSidebarOpen = true;
-							}}
-						>
-							<Image class="w-4 h-4 mr-2" />
-							Select Images
-						</Button>
-					</SheetTrigger>
-					<SheetContent class="w-[600px] sm:w-[800px]">
-						<SheetHeader>
-							<SheetTitle>Select Images</SheetTitle>
-						</SheetHeader>
+				<div class="flex gap-2">
+					<!-- Upload Images Button -->
+					<Button
+						type="button"
+						variant="outline"
+						onclick={() => document.getElementById('imageUpload')?.click()}
+						disabled={isUploading}
+					>
+						<Upload class="w-4 h-4 mr-2" />
+						{isUploading ? 'Uploading...' : 'Upload Images'}
+					</Button>
+					<input
+						id="imageUpload"
+						type="file"
+						multiple
+						accept="image/*"
+						onchange={handleImageUpload}
+						class="hidden"
+					/>
 
-						<div class="mt-6 space-y-4">
-							<!-- Search and Add Button -->
-							<div class="flex gap-2">
-								<Input
-									bind:value={imageSearchQuery}
-									placeholder="Search images..."
-									class="flex-1"
-								/>
-								<Button
-									type="button"
-									onclick={addSelectedImages}
-									disabled={selectedImageIds.length === 0}
-								>
-									Add {selectedImageIds.length} image(s)
-								</Button>
-							</div>
+					<!-- Select from Library Button -->
+					<Sheet bind:open={isImageSidebarOpen}>
+						<SheetTrigger>
+							<Button
+								type="button"
+								variant="outline"
+								onclick={() => {
+									isImageSidebarOpen = true;
+								}}
+							>
+								<Image class="w-4 h-4 mr-2" />
+								Select from Library
+							</Button>
+						</SheetTrigger>
+						<SheetContent class="w-[600px] sm:w-[800px]">
+							<SheetHeader>
+								<SheetTitle>Select Images from Library</SheetTitle>
+							</SheetHeader>
 
-							<!-- Image Tag Filters -->
-							{#if availableTags.length > 0}
-								<div class="space-y-2">
-									<Label class="text-sm text-gray-600">Filter by Tags</Label>
-									<div class="flex flex-wrap gap-2">
-										{#each availableTags as tag}
-											<button
-												type="button"
-												onclick={() => {
-													if (imageSelectedTags.includes(tag)) {
-														imageSelectedTags =
-															imageSelectedTags.filter(
-																(t) => t !== tag
-															);
-													} else {
-														imageSelectedTags = [
-															...imageSelectedTags,
-															tag
-														];
-													}
-												}}
-												class="px-3 py-1 text-sm border rounded-md hover:bg-gray-50 transition-colors {imageSelectedTags.includes(
-													tag
-												)
-													? 'bg-blue-50 border-blue-200 text-blue-700'
-													: 'bg-white border-gray-200 text-gray-700'}"
-											>
-												{tag}
-											</button>
-										{/each}
-									</div>
+							<div class="mt-6 space-y-4">
+								<!-- Search and Add Button -->
+								<div class="flex gap-2">
+									<Input
+										bind:value={imageSearchQuery}
+										placeholder="Search images..."
+										class="flex-1"
+									/>
+									<Button
+										type="button"
+										onclick={addSelectedImages}
+										disabled={selectedImageIds.length === 0}
+									>
+										Add {selectedImageIds.length} image(s)
+									</Button>
 								</div>
-							{/if}
 
-							<!-- Images Grid -->
-							<div class="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
-								{#each filterImages() as image}
-									<div class="relative group">
-										<button
-											type="button"
-											onclick={() => toggleImageSelection(image.id)}
-											class="w-full aspect-square border rounded-lg overflow-hidden hover:border-blue-300 transition-colors {selectedImageIds.includes(
-												image.id
-											)
-												? 'border-blue-500 bg-blue-50'
-												: 'border-gray-200'}"
-										>
-											<img
-												src={image.thumbUrl}
-												alt={image.title || image.filename}
-												class="w-full h-full object-cover"
-											/>
-											{#if selectedImageIds.includes(image.id)}
-												<div
-													class="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center"
+								<!-- Image Tag Filters -->
+								{#if availableTags.length > 0}
+									<div class="space-y-2">
+										<Label class="text-sm text-gray-600">Filter by Tags</Label>
+										<div class="flex flex-wrap gap-2">
+											{#each availableTags as tag}
+												<button
+													type="button"
+													onclick={() => {
+														if (imageSelectedTags.includes(tag)) {
+															imageSelectedTags =
+																imageSelectedTags.filter(
+																	(t) => t !== tag
+																);
+														} else {
+															imageSelectedTags = [
+																...imageSelectedTags,
+																tag
+															];
+														}
+													}}
+													class="px-3 py-1 text-sm border rounded-md hover:bg-gray-50 transition-colors {imageSelectedTags.includes(
+														tag
+													)
+														? 'bg-blue-50 border-blue-200 text-blue-700'
+														: 'bg-white border-gray-200 text-gray-700'}"
 												>
-													<div
-														class="bg-blue-500 text-white rounded-full p-1"
-													>
-														<Plus class="w-4 h-4" />
-													</div>
-												</div>
-											{/if}
-										</button>
-										<div class="mt-1 text-xs text-gray-600 truncate">
-											{image.title || image.filename}
+													{tag}
+												</button>
+											{/each}
 										</div>
 									</div>
-								{/each}
+								{/if}
+
+								<!-- Images Grid -->
+								<div class="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
+									{#each filterImages() as image}
+										<div class="relative group">
+											<button
+												type="button"
+												onclick={() => toggleImageSelection(image.id)}
+												class="w-full aspect-square border rounded-lg overflow-hidden hover:border-blue-300 transition-colors {selectedImageIds.includes(
+													image.id
+												)
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-200'}"
+											>
+												<img
+													src={image.thumbUrl}
+													alt={image.title || image.filename}
+													class="w-full h-full object-cover"
+												/>
+												{#if selectedImageIds.includes(image.id)}
+													<div
+														class="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center"
+													>
+														<div
+															class="bg-blue-500 text-white rounded-full p-1"
+														>
+															<Plus class="w-4 h-4" />
+														</div>
+													</div>
+												{/if}
+											</button>
+											<div class="mt-1 text-xs text-gray-600 truncate">
+												{image.title || image.filename}
+											</div>
+										</div>
+									{/each}
+								</div>
 							</div>
-						</div>
-					</SheetContent>
-				</Sheet>
+						</SheetContent>
+					</Sheet>
+				</div>
 			</div>
+
+			<!-- Upload Progress -->
+			{#if isUploading}
+				<div class="w-full bg-gray-200 rounded-full h-2">
+					<div
+						class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+						style="width: {uploadProgress}%"
+					></div>
+				</div>
+			{/if}
 
 			<!-- Selected Images -->
 			{#if selectedImages.length > 0}
 				<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 					{#each selectedImages as image, index}
 						<div class="relative group">
-							<div class="aspect-square border rounded-lg overflow-hidden">
+							<div
+								class="aspect-square border-2 rounded-lg overflow-hidden {coverImageId ===
+								image.id
+									? 'border-blue-500 ring-2 ring-blue-200'
+									: 'border-gray-200'} transition-all duration-200"
+							>
 								<img
 									src={image.thumbUrl}
 									alt={image.filename}
 									class="w-full h-full object-cover"
 								/>
+
+								<!-- Cover Image Indicator -->
+								{#if coverImageId === image.id}
+									<div
+										class="absolute top-2 left-2 bg-blue-500 text-white rounded-full p-1"
+									>
+										<Star class="w-3 h-3" />
+									</div>
+								{/if}
+
+								<!-- Remove Button -->
 								<button
 									type="button"
 									onclick={() => removeImage(image.id)}
@@ -576,22 +687,21 @@
 								>
 									<X class="w-3 h-3" />
 								</button>
+
+								<!-- Set Cover Button -->
+								<button
+									type="button"
+									onclick={() => setCoverImage(image.id)}
+									class="absolute bottom-1 left-1 bg-white bg-opacity-90 text-gray-700 rounded px-2 py-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity {coverImageId ===
+									image.id
+										? 'bg-blue-500 text-white'
+										: ''}"
+								>
+									{coverImageId === image.id ? 'Cover' : 'Set Cover'}
+								</button>
 							</div>
-							<div class="mt-2 space-y-2">
-								<div class="text-xs text-gray-600 truncate">
-									{image.filename}
-								</div>
-								<div class="flex gap-1">
-									<button
-										type="button"
-										onclick={() => setCoverImage(image.id)}
-										class="text-xs px-2 py-1 rounded {coverImageId === image.id
-											? 'bg-blue-500 text-white'
-											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'}"
-									>
-										{coverImageId === image.id ? 'Cover' : 'Set Cover'}
-									</button>
-								</div>
+							<div class="mt-2 text-xs text-gray-600 truncate">
+								{image.filename}
 							</div>
 						</div>
 					{/each}
