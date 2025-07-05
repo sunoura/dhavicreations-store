@@ -41,6 +41,7 @@
 					goto('/admin/dashboard');
 				}
 			} else {
+				console.log(data);
 				error = data.error || 'Login failed';
 			}
 		} catch (err) {
