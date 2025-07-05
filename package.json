@@ -28,11 +28,13 @@
 		"bits-ui": "^2.8.10",
 		"clsx": "^2.1.1",
 		"drizzle-kit": "^0.30.2",
+		"formsnap": "^2.0.1",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
 		"supabase": "^2.30.4",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
+		"sveltekit-superforms": "^2.27.1",
 		"tailwind-merge": "^3.3.1",
 		"tailwind-variants": "^1.0.0",
 		"tailwindcss": "^4.0.0",
@@ -46,10 +48,12 @@
 		"@node-rs/argon2": "^2.0.2",
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
+		"@vercel/blob": "^1.1.1",
 		"dotenv": "^17.0.1",
 		"drizzle-orm": "^0.40.0",
 		"mode-watcher": "^1.1.0",
-		"postgres": "^3.4.5"
+		"postgres": "^3.4.5",
+		"sharp": "^0.34.2"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
