@@ -60,6 +60,7 @@
 		allImages: AvailableImage[];
 		onSubmit: (formData: FormData) => Promise<void>;
 		onCancel: () => void;
+		onArchive?: () => Promise<void>;
 		isLoading?: boolean;
 	}
 
@@ -71,6 +72,7 @@
 		allImages,
 		onSubmit,
 		onCancel,
+		onArchive,
 		isLoading = false
 	}: Props = $props();
 
@@ -736,6 +738,16 @@
 			<Button type="button" variant="outline" onclick={onCancel} disabled={isLoading}>
 				Cancel
 			</Button>
+			{#if mode === 'edit' && onArchive}
+				<Button
+					type="button"
+					variant="destructive"
+					onclick={onArchive}
+					disabled={isLoading}
+				>
+					Archive Product
+				</Button>
+			{/if}
 		</div>
 	</form>
 </div>
