@@ -110,6 +110,17 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 			return json({ error: 'Missing required fields' }, { status: 400 });
 		}
 
+		// Check for price overflow (price in paise must fit in PostgreSQL integer)
+		const priceInPaise = price * 100;
+		if (priceInPaise > 2147483647) {
+			return json(
+				{
+					error: 'Price is too high. Maximum allowed price is ₹21,474,836.47'
+				},
+				{ status: 400 }
+			);
+		}
+
 		// Check if slug already exists (excluding current product)
 		const existingSlug = await db
 			.select({ id: products.id })

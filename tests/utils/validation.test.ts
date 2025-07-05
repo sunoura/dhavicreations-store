@@ -286,7 +286,7 @@ describe('Data Validation Tests', () => {
 			// Date validation
 			const date = new Date();
 			expect(date instanceof Date).toBe(true);
-			expect('2023-01-01' instanceof Date).toBe(false);
+			expect(isNaN(Date.parse('2023-01-01'))).toBe(false);
 		});
 	});
 

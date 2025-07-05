@@ -6,10 +6,13 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit(), devtoolsJson()],
 	ssr: {
-		noExternal: ['@node-rs/argon2']
+		external: ['@node-rs/argon2']
 	},
 	optimizeDeps: {
 		exclude: ['@node-rs/argon2', 'sharp', 'postgres']
+	},
+	define: {
+		global: 'globalThis'
 	},
 	test: {
 		environment: 'node',

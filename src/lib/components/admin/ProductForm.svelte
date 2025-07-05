@@ -175,6 +175,9 @@
 		toast.success('Cover image updated');
 	}
 
+	// Get unique image tags from all images
+	let imageTags = $derived([...new Set(allImages.flatMap((image) => image.tags || []))].sort());
+
 	function filterImages() {
 		let filtered = allImages;
 
@@ -539,7 +542,9 @@
 							<Button
 								type="button"
 								variant="outline"
-								onclick={() => {
+								onclick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
 									isImageSidebarOpen = true;
 								}}
 							>
@@ -570,11 +575,13 @@
 								</div>
 
 								<!-- Image Tag Filters -->
-								{#if availableTags.length > 0}
+								{#if imageTags.length > 0}
 									<div class="space-y-2">
-										<Label class="text-sm text-gray-600">Filter by Tags</Label>
+										<Label class="text-sm text-gray-600"
+											>Filter by Image Tags</Label
+										>
 										<div class="flex flex-wrap gap-2">
-											{#each availableTags as tag}
+											{#each imageTags as tag}
 												<button
 													type="button"
 													onclick={() => {

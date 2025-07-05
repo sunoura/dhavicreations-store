@@ -116,8 +116,11 @@ export const load: PageServerLoad = async ({ params }) => {
 			tags: tagsByImageId[image.id] || []
 		}));
 
-		// Get unique tags from all images
-		const allTags = [...new Set(imageTagsData.map((tag) => tag.tagName))].sort();
+		// Get unique product tags (not image tags)
+		const allProductTagsData = await db
+			.select({ tagName: productTags.tagName })
+			.from(productTags);
+		const allTags = [...new Set(allProductTagsData.map((tag) => tag.tagName))].sort();
 
 		return {
 			product: {
