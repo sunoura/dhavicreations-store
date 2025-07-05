@@ -25,6 +25,9 @@
 	let isActive = $state(true);
 	let selectedTags = $state<string[]>([]);
 	let newTag = $state('');
+	let newCategoryName = $state('');
+	let newCategoryDescription = $state('');
+	let isCreatingCategory = $state(false);
 	let selectedImages = $state<
 		Array<{
 			id: number;
@@ -118,6 +121,10 @@
 			.replace(/^-+|-+$/g, '');
 	}
 
+	function resetSlug() {
+		generateSlug();
+	}
+
 	function toggleTag(tag: string) {
 		if (selectedTags.includes(tag)) {
 			selectedTags = selectedTags.filter((t) => t !== tag);
@@ -136,6 +143,58 @@
 
 	function removeTag(tag: string) {
 		selectedTags = selectedTags.filter((t) => t !== tag);
+	}
+
+	async function createCategory() {
+		if (!newCategoryName.trim()) {
+			toast.error('Category name is required');
+			return;
+		}
+
+		isCreatingCategory = true;
+		try {
+			const formData = new FormData();
+			formData.append('name', newCategoryName.trim());
+			formData.append(
+				'slug',
+				newCategoryName
+					.trim()
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, '-')
+					.replace(/^-+|-+$/g, '')
+			);
+			if (newCategoryDescription.trim()) {
+				formData.append('description', newCategoryDescription.trim());
+			}
+
+			const response = await fetch('/api/categories', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || 'Failed to create category');
+			}
+
+			const newCategory = await response.json();
+
+			// Add to categories list and select it
+			categories = [newCategory, ...categories];
+			categoryId = newCategory.id;
+
+			// Clear form
+			newCategoryName = '';
+			newCategoryDescription = '';
+
+			toast.success('Category created successfully!');
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Failed to create category';
+			toast.error(errorMessage);
+			console.error('Error creating category:', err);
+		} finally {
+			isCreatingCategory = false;
+		}
 	}
 
 	function toggleImageSelection(imageId: number) {
@@ -304,7 +363,18 @@
 
 			<div class="space-y-2">
 				<Label for="slug">Slug *</Label>
-				<Input id="slug" bind:value={slug} required />
+				<div class="flex gap-2">
+					<Input id="slug" bind:value={slug} required class="flex-1" />
+					<Button
+						type="button"
+						variant="outline"
+						onclick={resetSlug}
+						disabled={!title.trim()}
+						class="whitespace-nowrap"
+					>
+						Reset
+					</Button>
+				</div>
 			</div>
 
 			<div class="space-y-2">
@@ -323,6 +393,42 @@
 						{/each}
 					</Select.Content>
 				</Select.Root>
+
+				<!-- Add New Category -->
+				<div class="space-y-2 mt-4 p-4 border rounded-lg bg-gray-50">
+					<Label class="text-sm text-gray-600">Add New Category</Label>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+						<Input
+							bind:value={newCategoryName}
+							placeholder="Category name"
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									createCategory();
+								}
+							}}
+						/>
+						<Input
+							bind:value={newCategoryDescription}
+							placeholder="Description (optional)"
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									createCategory();
+								}
+							}}
+						/>
+					</div>
+					<Button
+						type="button"
+						variant="outline"
+						onclick={createCategory}
+						disabled={!newCategoryName.trim() || isCreatingCategory}
+						class="w-full"
+					>
+						{isCreatingCategory ? 'Creating...' : 'Add Category'}
+					</Button>
+				</div>
 			</div>
 
 			<div class="space-y-2">
