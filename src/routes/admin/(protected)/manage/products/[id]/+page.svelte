@@ -18,7 +18,7 @@
 
 	let title = $state('');
 	let slug = $state('');
-	let categoryId = $state<number | null>(null);
+	let categoryId = $state<string | null>(null);
 	let description = $state('');
 	let price = $state('');
 	let sku = $state('');
@@ -87,7 +87,7 @@
 
 			title = product.title;
 			slug = product.slug;
-			categoryId = product.categoryId;
+			categoryId = product.categoryId.toString();
 			description = product.description || '';
 			price = product.price.toString();
 			sku = product.sku;
@@ -214,7 +214,7 @@
 
 			// Add to categories list and select it
 			categories = [newCategory, ...categories];
-			categoryId = newCategory.id;
+			categoryId = newCategory.id.toString();
 
 			// Clear form
 			newCategoryName = '';
@@ -321,7 +321,7 @@
 			const formData = new FormData();
 			formData.append('title', title.trim());
 			formData.append('slug', slug.trim());
-			formData.append('categoryId', categoryId.toString());
+			formData.append('categoryId', categoryId!);
 			if (description.trim()) {
 				formData.append('description', description.trim());
 			}
@@ -464,12 +464,12 @@
 					<Select.Root type="single" bind:value={categoryId} required>
 						<Select.Trigger class="w-full">
 							{categoryId
-								? categories.find((c) => c.id === categoryId)?.name
+								? categories.find((c) => c.id.toString() === categoryId)?.name
 								: 'Select a category'}
 						</Select.Trigger>
 						<Select.Content>
 							{#each categories as category}
-								<Select.Item value={category.id} label={category.name}>
+								<Select.Item value={category.id.toString()} label={category.name}>
 									{category.name}
 								</Select.Item>
 							{/each}
