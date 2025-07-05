@@ -107,12 +107,12 @@ export const products = pgTable('products', {
 	slug: text('slug').notNull().unique(),
 	categoryId: integer('category_id')
 		.notNull()
-		.references(() => categories.id),
+		.references(() => categories.id, { onDelete: 'restrict' }),
 	description: text('description'),
 	price: integer('price').notNull(), // Price in paise (₹1 = 100 paise)
 	sku: text('sku').notNull().unique(),
 	stock: integer('stock').notNull().default(0),
-	coverImageId: integer('cover_image_id').references(() => images.id),
+	coverImageId: integer('cover_image_id').references(() => images.id, { onDelete: 'set null' }),
 	isActive: boolean('is_active').default(true).notNull(),
 	archivedAt: timestamp('archived_at', {
 		withTimezone: true,
