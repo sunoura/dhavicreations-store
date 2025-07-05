@@ -23,7 +23,22 @@ export const GET: RequestHandler = async () => {
 			.from(images)
 			.orderBy(desc(images.createdAt));
 
-		return json(allImages);
+		// Get tags for each image
+		const imagesWithTags = await Promise.all(
+			allImages.map(async (image) => {
+				const imageTagsResult = await db
+					.select({ tagName: imageTags.tagName })
+					.from(imageTags)
+					.where(eq(imageTags.imageId, image.id));
+
+				return {
+					...image,
+					tags: imageTagsResult.map((tag) => tag.tagName)
+				};
+			})
+		);
+
+		return json(imagesWithTags);
 	} catch (error) {
 		console.error('Error fetching images:', error);
 		return json({ error: 'Failed to fetch images' }, { status: 500 });
