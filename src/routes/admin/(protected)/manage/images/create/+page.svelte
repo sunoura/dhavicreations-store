@@ -4,6 +4,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { goto } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 
 	let title = $state('');
 	let description = $state('');
@@ -39,11 +40,13 @@
 	async function handleSubmit() {
 		if (!selectedFile) {
 			error = 'Please select an image file';
+			toast.error('Please select an image file');
 			return;
 		}
 
 		if (!title.trim()) {
 			error = 'Please enter a title';
+			toast.error('Please enter a title');
 			return;
 		}
 
@@ -71,10 +74,14 @@
 			const result = await response.json();
 			console.log('Upload successful:', result);
 
+			toast.success('Image uploaded successfully!');
+
 			// Redirect to images list
 			goto('/admin/manage/images');
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Upload failed';
+			const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+			error = errorMessage;
+			toast.error(errorMessage);
 			console.error('Upload error:', err);
 		} finally {
 			isUploading = false;
@@ -82,6 +89,7 @@
 	}
 
 	function handleCancel() {
+		toast.info('Upload cancelled');
 		history.back();
 	}
 

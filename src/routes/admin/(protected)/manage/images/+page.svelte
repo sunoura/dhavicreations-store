@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { goto } from '$app/navigation';
 	import { Pencil, Copy } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 
 	let images = $state<
 		Array<{
@@ -31,7 +32,9 @@
 
 			images = await response.json();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load images';
+			const errorMessage = err instanceof Error ? err.message : 'Failed to load images';
+			error = errorMessage;
+			toast.error(errorMessage);
 			console.error('Error loading images:', err);
 		} finally {
 			isLoading = false;
@@ -45,9 +48,9 @@
 	async function copyImageUrl(url: string) {
 		try {
 			await navigator.clipboard.writeText(url);
-			// You could add a toast notification here
-			console.log('Image URL copied to clipboard');
+			toast.success('Image URL copied to clipboard');
 		} catch (err) {
+			toast.error('Failed to copy URL to clipboard');
 			console.error('Failed to copy URL:', err);
 		}
 	}

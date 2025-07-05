@@ -4,7 +4,8 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import { toast } from 'svelte-sonner';
 
 	let image = $state<{
 		id: number;
@@ -33,7 +34,7 @@
 			isLoading = true;
 			error = null;
 
-			const response = await fetch(`/api/images/${$page.params.id}`);
+			const response = await fetch(`/api/images/${page.params.id}`);
 			if (!response.ok) {
 				throw new Error('Failed to load image');
 			}
@@ -42,7 +43,9 @@
 			title = image.title || '';
 			description = image.description || '';
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load image';
+			const errorMessage = err instanceof Error ? err.message : 'Failed to load image';
+			error = errorMessage;
+			toast.error(errorMessage);
 			console.error('Error loading image:', err);
 		} finally {
 			isLoading = false;
@@ -112,9 +115,12 @@
 			}
 
 			// Reload the image data
-			await loadImage();
+			toast.success('Image updated successfully!');
+			goto('/admin/manage/images');
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to update image';
+			const errorMessage = err instanceof Error ? err.message : 'Failed to update image';
+			error = errorMessage;
+			toast.error(errorMessage);
 			console.error('Error updating image:', err);
 		} finally {
 			isSaving = false;
@@ -122,10 +128,13 @@
 	}
 
 	async function handleDelete() {
-		if (
-			!image ||
-			!confirm('Are you sure you want to delete this image? This action cannot be undone.')
-		) {
+		if (!image) {
+			toast.error('No image to delete');
+			return;
+		}
+
+		if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+			toast.info('Delete cancelled');
 			return;
 		}
 
@@ -142,10 +151,13 @@
 				throw new Error(errorData.error || 'Failed to delete image');
 			}
 
+			toast.success('Image deleted successfully!');
 			// Redirect back to images list
 			goto('/admin/manage/images');
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to delete image';
+			const errorMessage = err instanceof Error ? err.message : 'Failed to delete image';
+			error = errorMessage;
+			toast.error(errorMessage);
 			console.error('Error deleting image:', err);
 		} finally {
 			isDeleting = false;
@@ -153,6 +165,7 @@
 	}
 
 	function handleCancel() {
+		toast.info('Changes discarded');
 		goto('/admin/manage/images');
 	}
 
@@ -174,7 +187,13 @@
 <div class="max-w-2xl mx-auto p-6">
 	<div class="flex justify-between items-center mb-6">
 		<h1 class="text-2xl font-semibold">Edit Image</h1>
-		<Button variant="outline" onclick={handleCancel}>Back to Images</Button>
+		<Button
+			variant="outline"
+			onclick={() => {
+				toast.info('Returning to images list');
+				handleCancel();
+			}}>Back to Images</Button
+		>
 	</div>
 
 	{#if isLoading}
