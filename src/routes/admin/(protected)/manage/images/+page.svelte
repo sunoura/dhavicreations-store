@@ -5,6 +5,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { onMount } from 'svelte';
 
 	let images = $state<
 		Array<{
@@ -118,13 +119,8 @@
 		images = filtered;
 	}
 
-	// Load images on component mount
-	$effect(() => {
+	onMount(() => {
 		loadImages();
-	});
-
-	// Load available tags on component mount
-	$effect(() => {
 		loadAvailableTags();
 	});
 

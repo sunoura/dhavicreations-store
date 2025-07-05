@@ -14,11 +14,16 @@
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { Image, Plus, X, Trash2 } from '@lucide/svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import CategoryForm from '$lib/components/admin/CategoryForm.svelte';
 
 	let title = $state('');
 	let slug = $state('');
+<<<<<<< HEAD
 	let categoryId = $state<string | null>(null);
+=======
+	let categoryId = $state<string | undefined>(undefined);
+>>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 	let description = $state('');
 	let price = $state('');
 	let sku = $state('');
@@ -26,6 +31,10 @@
 	let isActive = $state(true);
 	let selectedTags = $state<string[]>([]);
 	let newTag = $state('');
+<<<<<<< HEAD
+=======
+	let showCategoryForm = $state(false);
+>>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 	let newCategoryName = $state('');
 	let newCategoryDescription = $state('');
 	let isCreatingCategory = $state(false);
@@ -42,40 +51,31 @@
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 
+	// Get data from server
+	const pageData = page.data;
+	const serverProduct = pageData?.product;
+	const serverCategories = pageData?.categories || [];
+	const serverImages = pageData?.images || [];
+	const serverTags = pageData?.availableTags || [];
+
 	// Categories
-	let categories = $state<
-		Array<{
-			id: number;
-			name: string;
-			slug: string;
-			description: string | null;
-		}>
-	>([]);
-	let isLoadingCategories = $state(true);
+	let categories = $state(serverCategories);
+	let isLoadingCategories = $state(false);
 
 	// Available tags
-	let availableTags = $state<string[]>([]);
-	let isLoadingTags = $state(true);
+	let availableTags = $state(serverTags);
+	let isLoadingTags = $state(false);
 
 	// Image selection sidebar
 	let isImageSidebarOpen = $state(false);
-	let allImages = $state<
-		Array<{
-			id: number;
-			imageUrl: string;
-			thumbUrl: string;
-			filename: string;
-			title: string | null;
-			description: string | null;
-			tags: string[];
-		}>
-	>([]);
+	let allImages = $state(serverImages);
 	let imageSearchQuery = $state('');
 	let imageSelectedTags = $state<string[]>([]);
 	let selectedImageIds = $state<number[]>([]);
 
-	const productId = $page.params.id;
+	const productId = page.params.id;
 
+<<<<<<< HEAD
 	async function loadProduct() {
 		try {
 			isLoading = true;
@@ -145,6 +145,22 @@
 		} catch (err) {
 			console.error('Error loading images:', err);
 		}
+=======
+	// Initialize form with server data
+	if (serverProduct) {
+		title = serverProduct.title;
+		slug = serverProduct.slug;
+		categoryId = serverProduct.categoryId.toString();
+		description = serverProduct.description || '';
+		price = serverProduct.price.toString();
+		sku = serverProduct.sku;
+		stock = serverProduct.stock.toString();
+		isActive = serverProduct.isActive;
+		selectedTags = serverProduct.tags || [];
+		selectedImages = serverProduct.images || [];
+		coverImageId = serverProduct.coverImageId;
+		isLoading = false;
+>>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 	}
 
 	function generateSlug() {
@@ -239,7 +255,9 @@
 	}
 
 	function addSelectedImages() {
-		const imagesToAdd = allImages.filter((img) => selectedImageIds.includes(img.id));
+		const imagesToAdd = allImages.filter((img: { id: number }) =>
+			selectedImageIds.includes(img.id)
+		);
 		selectedImages = [...selectedImages, ...imagesToAdd];
 		selectedImageIds = [];
 		imageSearchQuery = '';
@@ -266,7 +284,7 @@
 		if (imageSearchQuery.trim()) {
 			const query = imageSearchQuery.toLowerCase();
 			filtered = filtered.filter(
-				(image) =>
+				(image: { title?: string | null; filename: string; description?: string | null }) =>
 					image.title?.toLowerCase().includes(query) ||
 					image.filename.toLowerCase().includes(query) ||
 					image.description?.toLowerCase().includes(query)
@@ -276,7 +294,8 @@
 		// Filter by selected tags
 		if (imageSelectedTags.length > 0) {
 			filtered = filtered.filter(
-				(image) => image.tags && imageSelectedTags.some((tag) => image.tags!.includes(tag))
+				(image: { tags?: string[] }) =>
+					image.tags && imageSelectedTags.some((tag) => image.tags!.includes(tag))
 			);
 		}
 
@@ -302,7 +321,7 @@
 			return;
 		}
 
-		if (!price.trim()) {
+		if (!price || price.toString().trim() === '') {
 			error = 'Price is required';
 			toast.error('Price is required');
 			return;
@@ -325,9 +344,9 @@
 			if (description.trim()) {
 				formData.append('description', description.trim());
 			}
-			formData.append('price', price.trim());
+			formData.append('price', price.toString().trim());
 			formData.append('sku', sku.trim());
-			formData.append('stock', stock.trim());
+			formData.append('stock', stock.toString().trim());
 			formData.append('isActive', isActive.toString());
 			if (selectedTags.length > 0) {
 				formData.append('tags', selectedTags.join(','));
@@ -401,13 +420,7 @@
 		history.back();
 	}
 
-	// Load data on component mount
-	$effect(() => {
-		loadProduct();
-		loadCategories();
-		loadAvailableTags();
-		loadImages();
-	});
+	// Data is now loaded server-side, no need for client-side loading functions
 </script>
 
 <div class="max-w-4xl mx-auto p-6">
@@ -461,6 +474,7 @@
 
 				<div class="space-y-2">
 					<Label for="category">Category *</Label>
+<<<<<<< HEAD
 					<Select.Root type="single" bind:value={categoryId} required>
 						<Select.Trigger class="w-full">
 							{categoryId
@@ -511,6 +525,51 @@
 							{isCreatingCategory ? 'Creating...' : 'Add Category'}
 						</Button>
 					</div>
+=======
+					<div class="flex gap-2">
+						<Select.Root type="single" bind:value={categoryId} required>
+							<Select.Trigger class="w-full">
+								{categoryId
+									? categories.find(
+											(c: { id: number; name: string }) =>
+												c.id.toString() === categoryId
+										)?.name
+									: 'Select a category'}
+							</Select.Trigger>
+							<Select.Content>
+								{#each categories as category}
+									<Select.Item
+										value={category.id.toString()}
+										label={category.name}
+									>
+										{category.name}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+						<Button
+							type="button"
+							variant="outline"
+							onclick={() => (showCategoryForm = true)}
+							class="whitespace-nowrap"
+						>
+							New
+						</Button>
+					</div>
+
+					<!-- Add New Category Form -->
+					{#if showCategoryForm}
+						<CategoryForm
+							{categories}
+							onCategoryCreated={(newCategory) => {
+								categories = [newCategory, ...categories];
+								categoryId = newCategory.id.toString();
+								showCategoryForm = false;
+							}}
+							onCancel={() => (showCategoryForm = false)}
+						/>
+					{/if}
+>>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 				</div>
 
 				<div class="space-y-2">
@@ -625,13 +684,12 @@
 				<div class="flex items-center justify-between">
 					<Label>Product Images</Label>
 					<Sheet bind:open={isImageSidebarOpen}>
-						<SheetTrigger asChild>
+						<SheetTrigger>
 							<Button
 								type="button"
 								variant="outline"
 								onclick={() => {
 									isImageSidebarOpen = true;
-									loadImages();
 								}}
 							>
 								<Image class="w-4 h-4 mr-2" />

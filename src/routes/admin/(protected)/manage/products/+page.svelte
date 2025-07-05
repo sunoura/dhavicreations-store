@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { Pencil, Copy, Archive } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
+	import { onMount } from 'svelte';
 
 	let products = $state<
 		Array<{
@@ -148,13 +149,8 @@
 		return `₹${rupees.toFixed(2)}`;
 	}
 
-	// Load products on component mount
-	$effect(() => {
+	onMount(() => {
 		loadProducts();
-	});
-
-	// Load available tags on component mount
-	$effect(() => {
 		loadAvailableTags();
 	});
 
@@ -274,9 +270,14 @@
 						<tr class="hover:bg-gray-50">
 							<td class="px-6 py-4 whitespace-nowrap">
 								<div class="flex items-center">
-									{#if product.coverImageId && product.images.length > 0}
+									{#if product.images.length > 0}
+										{@const coverImage = product.coverImageId
+											? product.images.find(
+													(img) => img.id === product.coverImageId
+												)
+											: product.images[0]}
 										<img
-											src={product.images[0].thumbUrl}
+											src={coverImage?.thumbUrl || product.images[0].thumbUrl}
 											alt={product.title}
 											class="h-10 w-10 rounded object-cover mr-3"
 										/>

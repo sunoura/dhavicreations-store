@@ -1,111 +1,100 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { Textarea } from '$lib/components/ui/textarea';
+	import * as Select from '$lib/components/ui/select';
+	import {
+		Sheet,
+		SheetContent,
+		SheetHeader,
+		SheetTitle,
+		SheetTrigger
+	} from '$lib/components/ui/sheet';
 	import { toast } from 'svelte-sonner';
-	import { page } from '$app/state';
-	import ProductForm from '$lib/components/admin/ProductForm.svelte';
+	import { Image, Plus, X } from '@lucide/svelte';
+	import CategoryForm from './CategoryForm.svelte';
 
-<<<<<<< HEAD
-	let title = $state('');
-	let slug = $state('');
-	let categoryId = $state<string | null>(null);
-	let description = $state('');
-	let price = $state('');
-	let sku = $state('');
-	let stock = $state('0');
-	let isActive = $state(true);
-	let selectedTags = $state<string[]>([]);
+	interface Category {
+		id: number;
+		name: string;
+		slug: string;
+		description: string | null;
+	}
+
+	interface ProductImage {
+		id: number;
+		imageUrl: string;
+		thumbUrl: string;
+		filename: string;
+	}
+
+	interface AvailableImage {
+		id: number;
+		imageUrl: string;
+		thumbUrl: string;
+		filename: string;
+		title?: string | null;
+		description?: string | null;
+		tags?: string[];
+	}
+
+	interface Props {
+		mode: 'create' | 'edit';
+		initialData?: {
+			id?: number;
+			title: string;
+			slug: string;
+			categoryId: string | undefined;
+			description: string;
+			price: string;
+			sku: string;
+			stock: string;
+			isActive: boolean;
+			selectedTags: string[];
+			selectedImages: ProductImage[];
+			coverImageId: number | null;
+		};
+		categories: Category[];
+		availableTags: string[];
+		allImages: AvailableImage[];
+		onSubmit: (formData: FormData) => Promise<void>;
+		onCancel: () => void;
+		isLoading?: boolean;
+	}
+
+	let {
+		mode,
+		initialData,
+		categories,
+		availableTags,
+		allImages,
+		onSubmit,
+		onCancel,
+		isLoading = false
+	}: Props = $props();
+
+	// Form state
+	let title = $state(initialData?.title || '');
+	let slug = $state(initialData?.slug || '');
+	let categoryId = $state<string | undefined>(initialData?.categoryId || undefined);
+	let description = $state(initialData?.description || '');
+	let price = $state(initialData?.price || '');
+	let sku = $state(initialData?.sku || '');
+	let stock = $state(initialData?.stock || '0');
+	let isActive = $state(initialData?.isActive ?? true);
+	let selectedTags = $state<string[]>(initialData?.selectedTags || []);
+	let selectedImages = $state<ProductImage[]>(initialData?.selectedImages || []);
+	let coverImageId = $state<number | null>(initialData?.coverImageId || null);
+
+	// UI state
 	let newTag = $state('');
-	let newCategoryName = $state('');
-	let newCategoryDescription = $state('');
-	let isCreatingCategory = $state(false);
-	let selectedImages = $state<
-		Array<{
-			id: number;
-			imageUrl: string;
-			thumbUrl: string;
-			filename: string;
-		}>
-	>([]);
-	let coverImageId = $state<number | null>(null);
-	let isSaving = $state(false);
-	let error = $state<string | null>(null);
-=======
-	// Get data from server with fallbacks
-	const pageData = page.data;
-	const serverCategories = pageData?.categories || [];
-	const serverImages = pageData?.images || [];
-	const serverTags = pageData?.availableTags || [];
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
-
-	async function handleSubmit(formData: FormData) {
-		const response = await fetch('/api/products', {
-			method: 'POST',
-			body: formData
-		});
-
-<<<<<<< HEAD
-	// Available tags
-	let availableTags = $state<string[]>([]);
-	let isLoadingTags = $state(true);
-
-	// Image selection sidebar
+	let showCategoryForm = $state(false);
 	let isImageSidebarOpen = $state(false);
-	let allImages = $state<
-		Array<{
-			id: number;
-			imageUrl: string;
-			thumbUrl: string;
-			filename: string;
-			title: string | null;
-			description: string | null;
-			tags: string[];
-		}>
-	>([]);
 	let imageSearchQuery = $state('');
 	let imageSelectedTags = $state<string[]>([]);
 	let selectedImageIds = $state<number[]>([]);
-
-	async function loadCategories() {
-		try {
-			isLoadingCategories = true;
-			const response = await fetch('/api/categories');
-			if (!response.ok) {
-				throw new Error('Failed to load categories');
-			}
-			categories = await response.json();
-		} catch (err) {
-			console.error('Error loading categories:', err);
-		} finally {
-			isLoadingCategories = false;
-		}
-	}
-
-	async function loadAvailableTags() {
-		try {
-			isLoadingTags = true;
-			const response = await fetch('/api/products/tags');
-			if (!response.ok) {
-				throw new Error('Failed to load tags');
-			}
-			availableTags = await response.json();
-		} catch (err) {
-			console.error('Error loading tags:', err);
-		} finally {
-			isLoadingTags = false;
-		}
-	}
-
-	async function loadImages() {
-		try {
-			const response = await fetch('/api/images');
-			if (!response.ok) {
-				throw new Error('Failed to load images');
-			}
-			allImages = await response.json();
-		} catch (err) {
-			console.error('Error loading images:', err);
-		}
-	}
+	let error = $state<string | null>(null);
 
 	function generateSlug() {
 		slug = title
@@ -138,56 +127,14 @@
 		selectedTags = selectedTags.filter((t) => t !== tag);
 	}
 
-	async function createCategory() {
-		if (!newCategoryName.trim()) {
-			toast.error('Category name is required');
-			return;
-		}
+	function handleCategoryCreated(newCategory: Category) {
+		categories = [newCategory, ...categories];
+		categoryId = newCategory.id.toString();
+		showCategoryForm = false;
+	}
 
-		isCreatingCategory = true;
-		try {
-			const formData = new FormData();
-			formData.append('name', newCategoryName.trim());
-			formData.append(
-				'slug',
-				newCategoryName
-					.trim()
-					.toLowerCase()
-					.replace(/[^a-z0-9]+/g, '-')
-					.replace(/^-+|-+$/g, '')
-			);
-			if (newCategoryDescription.trim()) {
-				formData.append('description', newCategoryDescription.trim());
-			}
-
-			const response = await fetch('/api/categories', {
-				method: 'POST',
-				body: formData
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.error || 'Failed to create category');
-			}
-
-			const newCategory = await response.json();
-
-			// Add to categories list and select it
-			categories = [newCategory, ...categories];
-			categoryId = newCategory.id.toString();
-
-			// Clear form
-			newCategoryName = '';
-			newCategoryDescription = '';
-
-			toast.success('Category created successfully!');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Failed to create category';
-			toast.error(errorMessage);
-			console.error('Error creating category:', err);
-		} finally {
-			isCreatingCategory = false;
-		}
+	function showNewCategoryForm() {
+		showCategoryForm = true;
 	}
 
 	function toggleImageSelection(imageId: number) {
@@ -199,7 +146,9 @@
 	}
 
 	function addSelectedImages() {
-		const imagesToAdd = allImages.filter((img) => selectedImageIds.includes(img.id));
+		const imagesToAdd = allImages.filter((img: { id: number }) =>
+			selectedImageIds.includes(img.id)
+		);
 		selectedImages = [...selectedImages, ...imagesToAdd];
 		selectedImageIds = [];
 		imageSearchQuery = '';
@@ -226,22 +175,21 @@
 		if (imageSearchQuery.trim()) {
 			const query = imageSearchQuery.toLowerCase();
 			filtered = filtered.filter(
-				(image) =>
+				(image: { title?: string | null; filename: string; description?: string | null }) =>
 					image.title?.toLowerCase().includes(query) ||
 					image.filename.toLowerCase().includes(query) ||
 					image.description?.toLowerCase().includes(query)
 			);
-=======
-		if (!response.ok) {
-			const errorData = await response.json();
-			throw new Error(errorData.error || 'Failed to create product');
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
 		}
 
-		const result = await response.json();
-		console.log('Product created successfully:', result);
+		// Filter by selected tags
+		if (imageSelectedTags.length > 0) {
+			filtered = filtered.filter(
+				(image: { tags?: string[] }) =>
+					image.tags && imageSelectedTags.some((tag) => image.tags!.includes(tag))
+			);
+		}
 
-<<<<<<< HEAD
 		return filtered;
 	}
 
@@ -264,7 +212,7 @@
 			return;
 		}
 
-		if (!price.trim()) {
+		if (!price || price.toString().trim() === '') {
 			error = 'Price is required';
 			toast.error('Price is required');
 			return;
@@ -276,7 +224,6 @@
 			return;
 		}
 
-		isSaving = true;
 		error = null;
 
 		try {
@@ -287,9 +234,9 @@
 			if (description.trim()) {
 				formData.append('description', description.trim());
 			}
-			formData.append('price', price.trim());
+			formData.append('price', price.toString().trim());
 			formData.append('sku', sku.trim());
-			formData.append('stock', stock.trim());
+			formData.append('stock', stock.toString().trim());
 			formData.append('isActive', isActive.toString());
 			if (selectedTags.length > 0) {
 				formData.append('tags', selectedTags.join(','));
@@ -301,44 +248,20 @@
 				formData.append('coverImageId', coverImageId.toString());
 			}
 
-			const response = await fetch('/api/products', {
-				method: 'POST',
-				body: formData
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.error || 'Failed to create product');
-			}
-
-			const result = await response.json();
-			console.log('Product created successfully:', result);
-
-			toast.success('Product created successfully!');
-			goto('/admin/manage/products');
+			await onSubmit(formData);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Failed to create product';
+			const errorMessage = err instanceof Error ? err.message : 'Failed to save product';
 			error = errorMessage;
 			toast.error(errorMessage);
-			console.error('Error creating product:', err);
-		} finally {
-			isSaving = false;
+			console.error('Error saving product:', err);
 		}
-=======
-		toast.success('Product created successfully!');
-		goto('/admin/manage/products');
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)
-	}
-
-	function handleCancel() {
-		toast.info('Product creation cancelled');
-		history.back();
 	}
 </script>
 
-<<<<<<< HEAD
 <div class="max-w-4xl mx-auto p-6">
-	<h1 class="text-2xl font-semibold mb-6">Create New Product</h1>
+	<h1 class="text-2xl font-semibold mb-6">
+		{mode === 'create' ? 'Create New Product' : 'Edit Product'}
+	</h1>
 
 	<form
 		onsubmit={(e) => {
@@ -372,56 +295,53 @@
 
 			<div class="space-y-2">
 				<Label for="category">Category *</Label>
-				<Select.Root type="single" bind:value={categoryId}>
-					<Select.Trigger class="w-full">
-						{categoryId
-							? categories.find((c) => c.id.toString() === categoryId)?.name
-							: 'Select a category'}
-					</Select.Trigger>
-					<Select.Content>
-						{#each categories as category}
-							<Select.Item value={category.id.toString()} label={category.name}>
-								{category.name}
-							</Select.Item>
-						{/each}
-					</Select.Content>
-				</Select.Root>
-
-				<!-- Add New Category -->
-				<div class="space-y-2 mt-4 p-4 border rounded-lg bg-gray-50">
-					<Label class="text-sm text-gray-600">Add New Category</Label>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-						<Input
-							bind:value={newCategoryName}
-							placeholder="Category name"
-							onkeydown={(e) => {
-								if (e.key === 'Enter') {
-									e.preventDefault();
-									createCategory();
-								}
-							}}
-						/>
-						<Input
-							bind:value={newCategoryDescription}
-							placeholder="Description (optional)"
-							onkeydown={(e) => {
-								if (e.key === 'Enter') {
-									e.preventDefault();
-									createCategory();
-								}
-							}}
-						/>
+				{#if categories.length > 0}
+					<div class="flex gap-2">
+						<Select.Root type="single" bind:value={categoryId}>
+							<Select.Trigger class="w-full">
+								{categoryId
+									? categories.find(
+											(c: { id: number; name: string }) =>
+												c.id.toString() === categoryId
+										)?.name
+									: 'Select a category'}
+							</Select.Trigger>
+							<Select.Content>
+								{#each categories as category}
+									<Select.Item
+										value={category.id.toString()}
+										label={category.name}
+									>
+										{category.name}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+						<Button
+							type="button"
+							variant="outline"
+							onclick={showNewCategoryForm}
+							class="whitespace-nowrap"
+						>
+							New
+						</Button>
 					</div>
-					<Button
-						type="button"
-						variant="outline"
-						onclick={createCategory}
-						disabled={!newCategoryName.trim() || isCreatingCategory}
-						class="w-full"
+				{:else}
+					<div
+						class="w-full h-10 bg-gray-100 rounded-md flex items-center justify-center text-gray-500"
 					>
-						{isCreatingCategory ? 'Creating...' : 'Add Category'}
-					</Button>
-				</div>
+						No categories available
+					</div>
+				{/if}
+
+				<!-- Add New Category Form -->
+				{#if showCategoryForm}
+					<CategoryForm
+						{categories}
+						onCategoryCreated={handleCategoryCreated}
+						onCancel={() => (showCategoryForm = false)}
+					/>
+				{/if}
 			</div>
 
 			<div class="space-y-2">
@@ -476,7 +396,7 @@
 			{/if}
 
 			<!-- Available Tags -->
-			{#if !isLoadingTags && availableTags.length > 0}
+			{#if availableTags.length > 0}
 				<div class="space-y-2">
 					<Label class="text-sm text-gray-600">Available Tags</Label>
 					<div class="flex flex-wrap gap-2">
@@ -529,13 +449,12 @@
 			<div class="flex items-center justify-between">
 				<Label>Product Images</Label>
 				<Sheet bind:open={isImageSidebarOpen}>
-					<SheetTrigger asChild>
+					<SheetTrigger>
 						<Button
 							type="button"
 							variant="outline"
 							onclick={() => {
 								isImageSidebarOpen = true;
-								loadImages();
 							}}
 						>
 							<Image class="w-4 h-4 mr-2" />
@@ -565,7 +484,7 @@
 							</div>
 
 							<!-- Image Tag Filters -->
-							{#if !isLoadingTags && availableTags.length > 0}
+							{#if availableTags.length > 0}
 								<div class="space-y-2">
 									<Label class="text-sm text-gray-600">Filter by Tags</Label>
 									<div class="flex flex-wrap gap-2">
@@ -695,22 +614,18 @@
 		{/if}
 
 		<div class="flex gap-4">
-			<Button type="submit" disabled={isSaving}>
-				{isSaving ? 'Creating...' : 'Create Product'}
+			<Button type="submit" disabled={isLoading}>
+				{isLoading
+					? mode === 'create'
+						? 'Creating...'
+						: 'Updating...'
+					: mode === 'create'
+						? 'Create Product'
+						: 'Update Product'}
 			</Button>
-			<Button type="button" variant="outline" onclick={handleCancel} disabled={isSaving}>
+			<Button type="button" variant="outline" onclick={onCancel} disabled={isLoading}>
 				Cancel
 			</Button>
 		</div>
 	</form>
 </div>
-=======
-<ProductForm
-	mode="create"
-	categories={serverCategories}
-	availableTags={serverTags}
-	allImages={serverImages}
-	onSubmit={handleSubmit}
-	onCancel={handleCancel}
-/>
->>>>>>> 28f7b87 (Fix infinite loop and improve product image display)

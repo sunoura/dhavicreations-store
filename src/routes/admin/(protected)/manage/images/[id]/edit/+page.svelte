@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
+	import { onMount } from 'svelte';
 
 	let image = $state<{
 		id: number;
@@ -78,10 +79,11 @@
 				throw new Error('Failed to load image');
 			}
 
-			image = await response.json();
-			title = image.title || '';
-			description = image.description || '';
-			selectedTags = image.tags || [];
+			const imageData = await response.json();
+			image = imageData;
+			title = imageData.title || '';
+			description = imageData.description || '';
+			selectedTags = imageData.tags || [];
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Failed to load image';
 			error = errorMessage;
@@ -213,23 +215,16 @@
 		goto('/admin/manage/images');
 	}
 
-	// Cleanup preview URL when component is destroyed
-	$effect(() => {
+	onMount(() => {
+		loadImage();
+		loadAvailableTags();
+
+		// Cleanup preview URL when component is destroyed
 		return () => {
 			if (previewUrl) {
 				URL.revokeObjectURL(previewUrl);
 			}
 		};
-	});
-
-	// Load image on component mount
-	$effect(() => {
-		loadImage();
-	});
-
-	// Load available tags on component mount
-	$effect(() => {
-		loadAvailableTags();
 	});
 </script>
 

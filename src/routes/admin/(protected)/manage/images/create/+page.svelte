@@ -5,6 +5,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
+	import { onMount } from 'svelte';
 
 	let title = $state('');
 	let description = $state('');
@@ -135,18 +136,15 @@
 		history.back();
 	}
 
-	// Cleanup preview URL when component is destroyed
-	$effect(() => {
+	onMount(() => {
+		loadAvailableTags();
+
+		// Cleanup preview URL when component is destroyed
 		return () => {
 			if (previewUrl) {
 				URL.revokeObjectURL(previewUrl);
 			}
 		};
-	});
-
-	// Load available tags on component mount
-	$effect(() => {
-		loadAvailableTags();
 	});
 </script>
 

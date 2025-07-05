@@ -71,7 +71,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		}
 
 		const contentType = request.headers.get('content-type');
-		
+
 		if (contentType?.includes('multipart/form-data')) {
 			// Handle file upload update
 			const formData = await request.formData();
@@ -84,7 +84,9 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 			}
 
 			// Import the required functions
-			const { uploadImage, uploadThumbnail, generateUniqueFilename } = await import('$lib/server/vercel-blob');
+			const { uploadImage, uploadThumbnail, generateUniqueFilename } = await import(
+				'$lib/server/vercel-blob'
+			);
 			const { generateThumbnailFromFile } = await import('$lib/server/image-utils');
 
 			// Generate unique filename
@@ -102,7 +104,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 					quality: 80,
 					format: 'jpeg'
 				});
-				
+
 				const thumbnailResult = await uploadThumbnail(thumbnailBuffer, uniqueFilename);
 				thumbnailUrl = thumbnailResult.url;
 			} catch (thumbnailError) {
@@ -160,11 +162,11 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 				// Insert new tags
 				if (Array.isArray(tags) && tags.length > 0) {
 					const tagValues = tags
-						.map((tagName) => ({
+						.map((tagName: string) => ({
 							imageId,
 							tagName: String(tagName).trim()
 						}))
-						.filter((tag) => tag.tagName.length > 0);
+						.filter((tag: { tagName: string }) => tag.tagName.length > 0);
 
 					if (tagValues.length > 0) {
 						await db.insert(imageTags).values(tagValues);
@@ -221,11 +223,11 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 			// Insert new tags
 			if (Array.isArray(body.tags) && body.tags.length > 0) {
 				const tagValues = body.tags
-					.map((tagName) => ({
+					.map((tagName: string) => ({
 						imageId,
 						tagName: String(tagName).trim()
 					}))
-					.filter((tag) => tag.tagName.length > 0);
+					.filter((tag: { tagName: string }) => tag.tagName.length > 0);
 
 				if (tagValues.length > 0) {
 					await db.insert(imageTags).values(tagValues);

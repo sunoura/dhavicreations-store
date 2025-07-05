@@ -4,21 +4,20 @@
 	import { ChevronDown } from '@lucide/svelte';
 
 	let {
-		ref = $bindable(null),
 		value = $bindable(),
 		disabled = $bindable(false),
 		class: className,
+		children,
 		...restProps
-	}: SelectPrimitive.RootProps = $props();
+	}: any = $props();
 </script>
 
 <SelectPrimitive.Root
-	bind:ref
-	bind:value
-	bind:disabled
+	{value}
+	{disabled}
 	data-slot="select"
 	class={cn('relative', className)}
 	{...restProps}
 >
-	<slot />
+	{@render children?.()}
 </SelectPrimitive.Root>
