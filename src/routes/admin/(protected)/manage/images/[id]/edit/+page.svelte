@@ -28,6 +28,45 @@
 	let isSaving = $state(false);
 	let isDeleting = $state(false);
 	let error = $state<string | null>(null);
+	let availableTags = $state<string[]>([]);
+	let selectedTags = $state<string[]>([]);
+	let newTag = $state('');
+	let isLoadingTags = $state(true);
+
+	async function loadAvailableTags() {
+		try {
+			isLoadingTags = true;
+			const response = await fetch('/api/images/tags');
+			if (!response.ok) {
+				throw new Error('Failed to load tags');
+			}
+			availableTags = await response.json();
+		} catch (err) {
+			console.error('Error loading tags:', err);
+		} finally {
+			isLoadingTags = false;
+		}
+	}
+
+	function toggleTag(tag: string) {
+		if (selectedTags.includes(tag)) {
+			selectedTags = selectedTags.filter((t) => t !== tag);
+		} else {
+			selectedTags = [...selectedTags, tag];
+		}
+	}
+
+	function addNewTag() {
+		const trimmedTag = newTag.trim();
+		if (trimmedTag && !selectedTags.includes(trimmedTag)) {
+			selectedTags = [...selectedTags, trimmedTag];
+			newTag = '';
+		}
+	}
+
+	function removeTag(tag: string) {
+		selectedTags = selectedTags.filter((t) => t !== tag);
+	}
 
 	async function loadImage() {
 		try {
@@ -42,6 +81,7 @@
 			image = await response.json();
 			title = image.title || '';
 			description = image.description || '';
+			selectedTags = image.tags || [];
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Failed to load image';
 			error = errorMessage;
@@ -77,7 +117,8 @@
 		try {
 			const updateData: any = {
 				title: title.trim() || null,
-				description: description.trim() || null
+				description: description.trim() || null,
+				tags: selectedTags
 			};
 
 			// If a new file is selected, we need to handle file upload
@@ -87,6 +128,9 @@
 				formData.append('title', title.trim());
 				if (description.trim()) {
 					formData.append('description', description.trim());
+				}
+				if (selectedTags.length > 0) {
+					formData.append('tags', selectedTags.join(','));
 				}
 
 				const response = await fetch(`/api/images/${image.id}`, {
@@ -182,6 +226,11 @@
 	$effect(() => {
 		loadImage();
 	});
+
+	// Load available tags on component mount
+	$effect(() => {
+		loadAvailableTags();
+	});
 </script>
 
 <div class="max-w-2xl mx-auto p-6">
@@ -256,6 +305,78 @@
 			<div class="space-y-2">
 				<Label for="description">Description</Label>
 				<Textarea id="description" name="description" bind:value={description} rows={3} />
+			</div>
+
+			<div class="space-y-4">
+				<Label>Tags</Label>
+
+				<!-- Selected Tags -->
+				{#if selectedTags.length > 0}
+					<div class="flex flex-wrap gap-2">
+						{#each selectedTags as tag}
+							<div
+								class="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm"
+							>
+								<span>{tag}</span>
+								<button
+									type="button"
+									onclick={() => removeTag(tag)}
+									class="text-blue-600 hover:text-blue-800 ml-1"
+								>
+									×
+								</button>
+							</div>
+						{/each}
+					</div>
+				{/if}
+
+				<!-- Available Tags -->
+				{#if !isLoadingTags && availableTags.length > 0}
+					<div class="space-y-2">
+						<Label class="text-sm text-gray-600">Available Tags</Label>
+						<div class="flex flex-wrap gap-2">
+							{#each availableTags as tag}
+								<button
+									type="button"
+									onclick={() => toggleTag(tag)}
+									class="px-3 py-1 text-sm border rounded-md hover:bg-gray-50 transition-colors {selectedTags.includes(
+										tag
+									)
+										? 'bg-blue-50 border-blue-200 text-blue-700'
+										: 'bg-white border-gray-200 text-gray-700'}"
+								>
+									{tag}
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Add New Tag -->
+				<div class="space-y-2">
+					<Label for="newTag" class="text-sm text-gray-600">Add New Tag</Label>
+					<div class="flex gap-2">
+						<Input
+							id="newTag"
+							bind:value={newTag}
+							placeholder="Enter new tag name"
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									addNewTag();
+								}
+							}}
+						/>
+						<Button
+							type="button"
+							variant="outline"
+							onclick={addNewTag}
+							disabled={!newTag.trim()}
+						>
+							Add
+						</Button>
+					</div>
+				</div>
 			</div>
 
 			<!-- Image Info -->
