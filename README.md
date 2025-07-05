@@ -1,38 +1,68 @@
-# sv
+# Dhavi Creations Store
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+This is the private codebase for the ecommerce store of **Dhavi Creations**, a fabric painting creator. The store is designed to showcase and sell unique hand-painted fabric products.
 
-## Creating a project
+---
 
-If you're seeing this, you've probably already done this step. Congrats!
+## 🛠️ Tech Stack
 
-```bash
-# create a new project in the current directory
-npx sv create
+- **Frontend:** SvelteKit
+- **Styling:** Tailwind CSS (via app.css)
+- **State Management:** Svelte stores (`.svelte.ts` in `$lib/stores`)
+- **Backend:** SvelteKit server endpoints
+- **Database:** PostgreSQL (hosted on Supabase)
+- **ORM:** Drizzle ORM
+- **Migrations:** Drizzle Kit
+- **Authentication:** Custom admin auth (see `src/lib/server/auth.ts`)
+- **Image Storage:** Supabase Storage & Vercel Blob
+- **Testing:** Vitest
+- **Package Manager:** pnpm
 
-# create a new project in my-app
-npx sv create my-app
-```
+---
 
-## Developing
+## 📁 Repo Structure
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- `src/` — SvelteKit app source
+    - `lib/` — shared components, stores, hooks, server utils
+    - `routes/` — SvelteKit routes (public & admin)
+    - `lib/server/db/schema.ts` — Drizzle ORM schema
+- `supabase/` — migrations and config for Supabase
+- `scripts/` — utility scripts (admin creation, db reset, etc.)
+- `tests/` — Vitest tests
 
-```bash
-npm run dev
+---
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+## 📝 Notes
 
-## Building
+- This is a **private repository** for personal reference and development.
+- All admin and sensitive logic is server-side only.
+- For database management, prefer the Supabase Table Editor or a GUI client.
+- Drizzle Studio is in beta and may not work reliably with Supabase.
 
-To create a production version of your app:
+---
 
-```bash
-npm run build
-```
+## 🚀 Quick Start
 
-You can preview the production build with `npm run preview`.
+1. Copy `.env.example` to `.env` and fill in your Supabase credentials.
+2. Install dependencies:
+    ```sh
+    pnpm install
+    ```
+3. Run migrations:
+    ```sh
+    pnpm drizzle-kit push
+    ```
+4. Start the dev server:
+    ```sh
+    pnpm dev
+    ```
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+---
+
+## About
+
+Dhavi Creations is dedicated to the art of fabric painting, offering unique, hand-crafted products for sale online.
+
+---
+
+_This README is for personal reference only. For questions, contact the repo owner._
