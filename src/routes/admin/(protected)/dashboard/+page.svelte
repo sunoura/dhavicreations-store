@@ -14,10 +14,15 @@
 		</div>
 
 		<div>
-			<ul class="list-inside text-xl">
+			<ul class="list-inside text-xl space-y-2">
 				<li>
 					<a class="text-blue-400 underline" href="/admin/manage/images/create"
 						>Upload a new Image</a
+					>
+				</li>
+				<li>
+					<a class="text-blue-400 underline" href="/admin/manage/products/create"
+						>Create a new Product</a
 					>
 				</li>
 			</ul>

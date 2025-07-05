@@ -125,6 +125,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		return {
 			product: {
 				...productData,
+				price: productData.price / 100, // Convert from paise to rupees
 				tags: productTagsData.map((pt) => pt.tagName),
 				images: productImagesData
 			},
