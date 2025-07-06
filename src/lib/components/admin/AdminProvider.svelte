@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createAdminState, setAdminContext } from '$lib/stores/admin.svelte';
+	import { createAdminState, setAdminContext } from '$lib/client/stores/admin.svelte';
 	import { page } from '$app/state';
 
 	let { children } = $props();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useAdmin } from '$lib/stores/admin.svelte';
+	import { useAdmin } from '$lib/client/stores/admin.svelte';
 
 	const { state } = useAdmin();
 

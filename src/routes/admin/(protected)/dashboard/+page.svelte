@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { useAdmin } from '$lib/stores/admin.svelte';
+	import { useAdmin } from '$lib/client/stores/admin.svelte';
 
 	const { state, actions } = useAdmin();
 </script>

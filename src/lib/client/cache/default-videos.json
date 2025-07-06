@@ -1,0 +1,127 @@
+{
+  "success": true,
+  "videos": [
+    {
+      "id": "default1",
+      "title": "Introduction to Fabric Painting Techniques",
+      "description": "Learn the essential basics of fabric painting with step-by-step guidance for beginners",
+      "thumbnail": "https://placehold.co/320x180/4f46e5/ffffff?text=Fabric+Painting+Basics",
+      "publishedAt": "2024-01-15T10:00:00Z",
+      "viewCount": "12500",
+      "duration": "15:32",
+      "url": "https://youtube.com/watch?v=default1"
+    },
+    {
+      "id": "default2", 
+      "title": "Advanced Color Mixing for Fabric Art",
+      "description": "Master professional color mixing techniques for vibrant fabric painting results",
+      "thumbnail": "https://placehold.co/320x180/7c3aed/ffffff?text=Color+Mixing",
+      "publishedAt": "2024-01-12T14:30:00Z",
+      "viewCount": "8200",
+      "duration": "22:15",
+      "url": "https://youtube.com/watch?v=default2"
+    },
+    {
+      "id": "default3",
+      "title": "Choosing the Perfect Fabrics for Painting",
+      "description": "Complete guide to selecting the right fabrics for different painting projects",
+      "thumbnail": "https://placehold.co/320x180/059669/ffffff?text=Fabric+Selection",
+      "publishedAt": "2024-01-10T09:15:00Z",
+      "viewCount": "15600",
+      "duration": "18:45",
+      "url": "https://youtube.com/watch?v=default3"
+    },
+    {
+      "id": "default4",
+      "title": "Watercolor Effects on Fabric Tutorial",
+      "description": "Create stunning watercolor effects using specialized fabric paints and techniques",
+      "thumbnail": "https://placehold.co/320x180/dc2626/ffffff?text=Watercolor+Effects",
+      "publishedAt": "2024-01-08T16:20:00Z",
+      "viewCount": "9800",
+      "duration": "19:42",
+      "url": "https://youtube.com/watch?v=default4"
+    },
+    {
+      "id": "default5",
+      "title": "Pattern Design and Transfer Methods",
+      "description": "Learn various techniques for creating and transferring patterns onto fabric",
+      "thumbnail": "https://placehold.co/320x180/f59e0b/ffffff?text=Pattern+Design",
+      "publishedAt": "2024-01-05T11:45:00Z",
+      "viewCount": "11200",
+      "duration": "16:28",
+      "url": "https://youtube.com/watch?v=default5"
+    },
+    {
+      "id": "default6",
+      "title": "Brush Techniques for Fine Detail Work",
+      "description": "Master precision brush techniques for intricate fabric painting details",
+      "thumbnail": "https://placehold.co/320x180/8b5cf6/ffffff?text=Brush+Techniques",
+      "publishedAt": "2024-01-03T13:10:00Z",
+      "viewCount": "7400",
+      "duration": "14:55",
+      "url": "https://youtube.com/watch?v=default6"
+    },
+    {
+      "id": "default7",
+      "title": "Setting and Caring for Painted Fabrics",
+      "description": "Essential tips for properly setting paint and maintaining your fabric art",
+      "thumbnail": "https://placehold.co/320x180/10b981/ffffff?text=Fabric+Care",
+      "publishedAt": "2023-12-01T15:30:00Z",
+      "viewCount": "13800",
+      "duration": "12:33",
+      "url": "https://youtube.com/watch?v=default7"
+    },
+    {
+      "id": "default8",
+      "title": "Creating Gradients and Blends",
+      "description": "Achieve smooth color transitions and beautiful gradient effects on fabric",
+      "thumbnail": "https://placehold.co/320x180/f43f5e/ffffff?text=Color+Gradients",
+      "publishedAt": "2023-12-28T10:20:00Z",
+      "viewCount": "10500",
+      "duration": "17:18",
+      "url": "https://youtube.com/watch?v=default8"
+    },
+    {
+      "id": "default9",
+      "title": "Stenciling Techniques for Fabric",
+      "description": "Professional stenciling methods for consistent and clean fabric designs",
+      "thumbnail": "https://placehold.co/320x180/0ea5e9/ffffff?text=Stenciling",
+      "publishedAt": "2023-12-25T14:45:00Z",
+      "viewCount": "8900",
+      "duration": "20:12",
+      "url": "https://youtube.com/watch?v=default9"
+    },
+    {
+      "id": "default10",
+      "title": "Mixed Media Fabric Art Projects",
+      "description": "Combine fabric painting with other techniques for unique mixed media pieces",
+      "thumbnail": "https://placehold.co/320x180/84cc16/ffffff?text=Mixed+Media",
+      "publishedAt": "2023-12-22T12:15:00Z",
+      "viewCount": "6700",
+      "duration": "24:40",
+      "url": "https://youtube.com/watch?v=default10"
+    },
+    {
+      "id": "default11",
+      "title": "Fabric Painting Tools and Setup",
+      "description": "Complete overview of essential tools and workspace setup for fabric painting",
+      "thumbnail": "https://placehold.co/320x180/a855f7/ffffff?text=Tools+Setup",
+      "publishedAt": "2023-12-20T09:30:00Z",
+      "viewCount": "14200",
+      "duration": "13:25",
+      "url": "https://youtube.com/watch?v=default11"
+    },
+    {
+      "id": "default12",
+      "title": "Troubleshooting Common Fabric Paint Issues",
+      "description": "Solutions to common problems and mistakes in fabric painting projects",
+      "thumbnail": "https://placehold.co/320x180/ef4444/ffffff?text=Troubleshooting",
+      "publishedAt": "2023-12-18T16:50:00Z",
+      "viewCount": "9300",
+      "duration": "18:07",
+      "url": "https://youtube.com/watch?v=default12"
+    }
+  ],
+  "count": 12,
+  "cached": true
+} 

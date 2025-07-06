@@ -87,7 +87,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 			const { uploadImage, uploadThumbnail, generateUniqueFilename } = await import(
 				'$lib/server/vercel-blob'
 			);
-			const { generateThumbnailFromFile } = await import('$lib/server/image-utils');
+			const { generateThumbnailFromFile } = await import('$lib/server/utils/image-utils');
 
 			// Generate unique filename
 			const uniqueFilename = generateUniqueFilename(file.name);

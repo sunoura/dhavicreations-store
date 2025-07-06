@@ -4,7 +4,7 @@ import { db } from '$lib/server/db';
 import { images, imageTags } from '$lib/server/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { uploadImage, uploadThumbnail, generateUniqueFilename } from '$lib/server/vercel-blob';
-import { generateThumbnailFromFile } from '$lib/server/image-utils';
+import { generateThumbnailFromFile } from '$lib/server/utils/image-utils';
 
 export const GET: RequestHandler = async () => {
 	try {
